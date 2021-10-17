@@ -1,4 +1,4 @@
-import { BaseEntity, BeforeInsert, Column, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { BaseEntity, Column, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { IsDate, IsString, IsJSON } from 'class-validator';
 import {Type} from 'class-transformer';
 import { SubjectEntity } from './subject.entity';
@@ -10,7 +10,7 @@ export class QuizEntity extends BaseEntity {
 
     @Column()
     @IsString()
-    public subject_id: string;
+    public subjectId: string;
 
     @Column()
     @IsString()
@@ -35,4 +35,6 @@ export class QuizEntity extends BaseEntity {
     @UpdateDateColumn()
     modify_date: Date;
 
+    @ManyToOne(() => SubjectEntity, user => user.quizs)
+    subject: SubjectEntity;
 }

@@ -1,6 +1,7 @@
-import { BaseEntity, BeforeInsert, Column, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { IsDate, IsString, MaxLength, MinLength } from 'class-validator';
+import { BaseEntity, OneToMany, Column, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { IsDate, IsString } from 'class-validator';
 import {Type} from 'class-transformer';
+import {QuizEntity} from './quiz.entity';
 
 @Entity('subject')
 export class SubjectEntity extends BaseEntity {
@@ -21,4 +22,7 @@ export class SubjectEntity extends BaseEntity {
     @Type(() => Date)
     @UpdateDateColumn()
     modify_date: Date;
+
+    @OneToMany(() => QuizEntity, quiz => quiz.subject)
+    quizs: QuizEntity[];
 }

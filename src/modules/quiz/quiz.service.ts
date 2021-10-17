@@ -1,8 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindAllQuizQuery, QuizDTO } from 'src/dto/quiz.dto';
+import {UpdateQuizBody, QuizDTO, CreateQuizBody} from 'src/dto/quiz.dto';
 import { QuizEntity } from 'src/entity/quiz.entity';
 import { Repository } from 'typeorm';
+import {
+  paginate,
+  Pagination,
+  IPaginationOptions,
+} from 'nestjs-typeorm-paginate';
 
 @Injectable()
 export class QuizService {
@@ -10,35 +15,44 @@ export class QuizService {
     @InjectRepository(QuizEntity) private quizRepository: Repository<QuizEntity>,
   ) {}
 
-  async create(createQuizDto: QuizDTO): Promise<QuizEntity> {
-    const quiz = new QuizEntity();
-    quiz.subject_id = createQuizDto.subject_id;
-    quiz.question = createQuizDto.question;
-    quiz.correct_answer = createQuizDto.correct_answer;
-    quiz.incorrect_answer = createQuizDto.incorrect_answer;
-    const result = await quiz.save()
+  async create(createQuizDto: CreateQuizBody): Promise<QuizEntity> {
+    const result = await this.quizRepository.save(createQuizDto);
     return result;
   }
 
-  async findAll(query: FindAllQuizQuery): Promise<QuizDTO[]> {
-    const result = await this.quizRepository.createQueryBuilder()
-      .select('*')
-      .where("subject_id = :subjectId", {subjectId: query.subjectId})
+  async findAll(option: IPaginationOptions): Promise<Pagination<QuizDTO>> {
+    const queryBuilder = this.quizRepository.createQueryBuilder("quiz")
+      .innerJoinAndSelect("quiz.subject", 'subject');
+
+    return paginate<QuizDTO>(queryBuilder, option);
+  }
+
+  async getQuizBySubject(subjectId: string): Promise<QuizDTO[]> {
+    const result = await this.quizRepository.createQueryBuilder('quiz')
+      .innerJoinAndSelect("quiz.subject", 'subject')
+      .where("quiz.subjectId = :subjectId", {subjectId})
       .limit(10)
       .offset(0)
-      .getRawMany<QuizDTO>();
+      .getRawAndEntities<QuizDTO>();
+
+    return result.entities;
+  }
+
+  async findOne(quizId: string): Promise<QuizDTO> {
+    const result = await this.quizRepository.createQueryBuilder()
+      .select("*")
+      .where("id = :quizId", {quizId})
+      .getRawOne();
     return result;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} quiz`;
+  async update(id: string, updateQuizDto: UpdateQuizBody): Promise<QuizDTO> {
+    const result = await this.quizRepository.update({id}, updateQuizDto);
+    return result.raw;
   }
 
-  update(id: number, updateQuizDto: QuizDTO) {
-    return `This action updates a #${id} quiz`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} quiz`;
+  async remove(id: string): Promise<QuizDTO> {
+    const result = await this.quizRepository.delete({id});
+    return result.raw;
   }
 }

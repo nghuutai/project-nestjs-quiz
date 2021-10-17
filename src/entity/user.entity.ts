@@ -40,13 +40,6 @@ export class User extends BaseEntity {
 
     @BeforeInsert()
 	public generateDateBeforeInsert(): void {
-        console.log('Before insert');
 		this.role = "admin";
 	}
-
-	// @BeforeUpdate()
-	// public generateDateBeforeUpdate(): void {
-    //     console.log('Before update');
-	// 	this.modify_date = new Date();
-	// }
 }

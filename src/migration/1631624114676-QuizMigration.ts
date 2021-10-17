@@ -14,7 +14,7 @@ export class QuizMigration1631624114676 implements MigrationInterface {
                     default: `uuid_generate_v4()`
                 },
                 {
-                    name: "subject_id",
+                    name: "subjectId",
                     type: "uuid",
                 },
                 {
